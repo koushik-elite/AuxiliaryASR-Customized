@@ -94,9 +94,6 @@ class MelDataset(torch.utils.data.Dataset):
 
         return wave, text, speaker_id
 
-
-
-
 class Collater(object):
     """
     Args:
@@ -140,12 +137,10 @@ class Collater(object):
 
         return texts, input_lengths, mels, output_lengths
 
-
-
 def build_dataloader(path_list,
                      validation=False,
                      batch_size=4,
-                     num_workers=1,
+                     num_workers=0,
                      device='cpu',
                      collate_config={},
                      dataset_config={}):
