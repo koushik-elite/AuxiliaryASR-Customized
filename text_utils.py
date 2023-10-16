@@ -3,7 +3,7 @@ import os
 import os.path as osp
 import pandas as pd
 
-DEFAULT_DICT_PATH = osp.join('word_index_dict.txt')
+DEFAULT_DICT_PATH = osp.join('word_tamil_dict.txt')
 class TextCleaner:
     def __init__(self, word_index_dict_path=DEFAULT_DICT_PATH):
         self.word_index_dictionary = self.load_dictionary(word_index_dict_path)
@@ -14,7 +14,8 @@ class TextCleaner:
             try:
                 indexes.append(self.word_index_dictionary[char])
             except KeyError:
-                print(char)
+                # print(char)
+                pass
         return indexes
 
     def load_dictionary(self, path):

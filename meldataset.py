@@ -14,7 +14,7 @@ import torch.nn.functional as F
 import torchaudio
 from torch.utils.data import DataLoader
 
-from g2p_en import G2p
+# from g2p_en import G2p
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ logger.setLevel(logging.DEBUG)
 from text_utils import TextCleaner
 np.random.seed(1)
 random.seed(1)
-DEFAULT_DICT_PATH = osp.join(osp.dirname(__file__), 'word_index_dict.txt')
+DEFAULT_DICT_PATH = osp.join(osp.dirname(__file__), 'word_tamil_dict.txt')
 SPECT_PARAMS = {
     "n_fft": 2048,
     "win_length": 1200,
@@ -53,7 +53,7 @@ class MelDataset(torch.utils.data.Dataset):
         self.to_melspec = torchaudio.transforms.MelSpectrogram(**MEL_PARAMS)
         self.mean, self.std = -4, 4
         
-        self.g2p = G2p()
+        # self.g2p = G2p()
 
     def __len__(self):
         return len(self.data_list)
@@ -77,21 +77,25 @@ class MelDataset(torch.utils.data.Dataset):
         return wave_tensor, acoustic_feature, text_tensor, data[0]
 
     def _load_tensor(self, data):
+        # print(data)
         wave_path, text, speaker_id = data
         speaker_id = int(speaker_id)
         wave, sr = sf.read(wave_path)
 
         # phonemize the text
-        ps = self.g2p(text.replace('-', ' '))
-        if "'" in ps:
-            ps.remove("'")
+        # ps = self.g2p(text.replace('-', ' '))
+        ps = text.replace('-', ' ')
+        ps = ps.split(" ")
+        # print(ps)
+        # if "'" in ps:
+        #     ps.remove("'")
         text = self.text_cleaner(ps)
         blank_index = self.text_cleaner.word_index_dictionary[" "]
         text.insert(0, blank_index) # add a blank at the beginning (silence)
         text.append(blank_index) # add a blank at the end (silence)
         
         text = torch.LongTensor(text)
-
+        # print(text.shape)
         return wave, text, speaker_id
 
 class Collater(object):
