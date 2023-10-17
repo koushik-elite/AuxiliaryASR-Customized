@@ -17,6 +17,9 @@ import click
 
 import logging
 from logging import StreamHandler
+
+torch.cuda.empty_cache()
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = StreamHandler()
