@@ -85,7 +85,7 @@ class MelDataset(torch.utils.data.Dataset):
         # phonemize the text
         # ps = self.g2p(text.replace('-', ' '))
         # ps = text.replace('-', ' ')
-        ps = ps.split("__")
+        ps = text.split("__")
         # print(ps)
         # if "'" in ps:
         #     ps.remove("'")
