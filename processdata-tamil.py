@@ -12,10 +12,10 @@ import pandas as pd
 import csv
 from tqdm import tqdm
 
-data_df = pd.read_csv("/home/ubuntu/AuxiliaryASR-Customized/Data-Sample/train_data.txt")
+data_df = pd.read_csv("/home/ubuntu/AuxiliaryASR-Customized/Data-Sample/train_tamil_tokens.txt")
 
-data_df["file"] = data_df["file"].apply(lambda x: "/mnt/d/mile_tamil_asr_corpus/asr_data_small/train/audio_files/" + x)
-data_df["text"] = data_df["text"].apply(lambda x: x.replace("|", " "))
+data_df["file"] = data_df["file"].apply(lambda x: "/mnt/d/mile_tamil_asr_corpus/asr_train_data/waves/" + x)
+# data_df["text"] = data_df["text"].apply(lambda x: x.replace("|", " "))
 
 data_df = data_df[["file", "text", "class"]]
 print(data_df.head())
