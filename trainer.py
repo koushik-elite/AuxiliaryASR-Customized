@@ -163,8 +163,17 @@ class Trainer(object):
         ppgs, s2s_pred, s2s_attn = self.model(
             mel_input, src_key_padding_mask=mel_mask, text_input=text_input)
         
-        loss_ctc = self.criterion['ctc'](ppgs.log_softmax(dim=2).transpose(0, 1),
-                                      text_input, mel_input_length, text_input_length)
+        ppgs_log = ppgs.log_softmax(dim=2).transpose(0, 1)
+        loss_ctc = self.criterion['ctc'](ppgs_log, text_input, mel_input_length, text_input_length)
+
+        if loss_ctc < 0:
+            print(f"ppgs_log={ppgs_log.shape}, text_input={text_input.shape}, mel_input_length={mel_input_length}, text_input_length={text_input_length}")
+            print(f"loss_ctc={loss_ctc}")
+            return {
+                'loss': loss.item(),
+                'ctc': loss_ctc.item(),
+                's2s': loss_s2s.item()
+            }
 
         loss_s2s = 0
         for _s2s_pred, _text_input, _text_length in zip(s2s_pred, text_input, text_input_length):

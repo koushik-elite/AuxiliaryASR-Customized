@@ -51,14 +51,14 @@ def main(config_path):
     train_path = config.get('train_data', None)
     val_path = config.get('val_data', None)
 
-    train_list, val_list = get_data_path_list(train_path, val_path)
-    train_dataloader = build_dataloader(train_list,
+    # train_list, val_list = get_data_path_list(train_path, val_path)
+    train_dataloader = build_dataloader(train_path,
                                         batch_size=batch_size,
                                         num_workers=0,
                                         dataset_config=config.get('dataset_params', {}),
                                         device=device)
 
-    val_dataloader = build_dataloader(val_list,
+    val_dataloader = build_dataloader(val_path,
                                       batch_size=batch_size,
                                       validation=True,
                                       num_workers=0,

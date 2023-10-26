@@ -13,7 +13,7 @@ from torch import nn
 import torch.nn.functional as F
 import torchaudio
 from torch.utils.data import DataLoader
-
+import pandas as pd
 # from g2p_en import G2p
 
 import logging
@@ -37,7 +37,7 @@ MEL_PARAMS = {
 
 class MelDataset(torch.utils.data.Dataset):
     def __init__(self,
-                 data_list,
+                 data_path,
                  dict_path=DEFAULT_DICT_PATH,
                  sr=24000
                 ):
@@ -45,8 +45,9 @@ class MelDataset(torch.utils.data.Dataset):
         spect_params = SPECT_PARAMS
         mel_params = MEL_PARAMS
 
-        _data_list = [l[:-1].split('|') for l in data_list]
-        self.data_list = [data if len(data) == 3 else (*data, 0) for data in _data_list]
+        # _data_list = [l[:-1].split('|') for l in data_list]
+        self.data_list = pd.read_csv(data_path)
+
         self.text_cleaner = TextCleaner(dict_path)
         self.sr = sr
 
@@ -56,11 +57,13 @@ class MelDataset(torch.utils.data.Dataset):
         # self.g2p = G2p()
 
     def __len__(self):
-        return len(self.data_list)
+        return self.data_list.shape[0]
 
     def __getitem__(self, idx):
-        data = self.data_list[idx]
+        data = self.data_list.iloc[idx].to_dict()
+        # print(data)
         wave, text_tensor, speaker_id = self._load_tensor(data)
+        
         wave_tensor = torch.from_numpy(wave).float()
         mel_tensor = self.to_melspec(wave_tensor)
 
@@ -73,19 +76,26 @@ class MelDataset(torch.utils.data.Dataset):
 
         length_feature = acoustic_feature.size(1)
         acoustic_feature = acoustic_feature[:, :(length_feature - length_feature % 2)]
-
-        return wave_tensor, acoustic_feature, text_tensor, data[0]
+        # print(wave_tensor, acoustic_feature, text_tensor, data[0])
+        return wave_tensor, acoustic_feature, text_tensor, data.values()
 
     def _load_tensor(self, data):
         # print(data)
-        wave_path, text, speaker_id = data
-        speaker_id = int(speaker_id)
+        wave_path = data["wave_path"]
+        text = data["text"]
+        speaker_id = data["speaker_id"]
+        # print("wave_path=",wave_path)
+        try:
+            speaker_id = int(speaker_id)
+        except Exception as e:
+            print(wave_path)
+            raise
         wave, sr = sf.read(wave_path)
 
         # phonemize the text
         # ps = self.g2p(text.replace('-', ' '))
-        # ps = text.replace('-', ' ')
-        ps = text.split("__")
+        text = text.replace('__', '  ')
+        ps = text.split(" ")
         # print(ps)
         # if "'" in ps:
         #     ps.remove("'")
@@ -95,7 +105,7 @@ class MelDataset(torch.utils.data.Dataset):
         text.append(blank_index) # add a blank at the end (silence)
         
         text = torch.LongTensor(text)
-        # print(text.shape)
+        # print(text)
         return wave, text, speaker_id
 
 class Collater(object):
